@@ -1,21 +1,17 @@
-import os
+import os.path
+from selene import browser, have, be
+from selene.support.shared.jquery_style import s
 
-import pytest
-from selene import browser, have,be
-from selene.support.shared.jquery_style import s, ss
 
 def test_practice_form():
     browser.open('/')
+
+    """Выполняем проверку что находимся на нужной странице"""
     s('.pattern-backgound').should(have.exact_text('Practice Form'))
 
-    first_name = browser.element('#firstName')
-    last_name = browser.element('#lastName')
-    date_of_birth = browser.element('#dateOfBirthInput')
-
-
     """Заполняем Name"""
-    first_name.should(be.blank).type("Alex")
-    last_name.should(be.blank).type('Davydov')
+    s('#firstName').should(be.blank).type("Alex")
+    s('#lastName').should(be.blank).type('Davydov')
 
     """Заполняем Email"""
     s('#userEmail').should(be.blank).type('AlexDavydov92@gmail.com')
@@ -33,14 +29,30 @@ def test_practice_form():
     s('.react-datepicker__day--020').click()
 
     """Заполняем Subjects"""
-    s('#subjectsInput').should(be.blank).type('Russia')
+    s('#subjectsInput').should(be.blank).type('English').press_enter()
 
     """Заполняем Hobbies"""
-    s('#hobbies-checkbox-2').click()
+    s('[for="hobbies-checkbox-2"]').click()
 
     """Подгружаем Picture"""
-    s('#uploadPicture').send_keys(os.path.abspath('tests/image/selfies.jpeg'))
+    s('#uploadPicture').send_keys(os.path.abspath('image/selfies.jpeg'))
 
+    """Вводим Address"""
+    s('#currentAddress').should(be.blank).type('South Street')
 
-    #first_name.should(have.exact_texts('Alex'))
-    #last_name.should(have.text('Davydov'))
+    """Выбираем State """
+    s('#react-select-3-input').type('Haryana').press_enter()
+
+    """Выбираем  City"""
+    s('#react-select-4-input').type('Karnal').press_enter()
+
+    """Нажимаем Отправить"""
+    s('#submit').click()
+
+    """Выполняем проверки что форма отправилась и заполнены все поля"""
+    s('#example-modal-sizes-title-lg').should(have.exact_text('Thanks for submitting the form'))
+    s('.table-responsive').should(have.text(
+        'Alex Davydov' and 'AlexDavydov92@gmail.com'
+        and 'Male' and '8005553535' and '20 June,1992'
+        and 'English' and 'Reading' and 'selfies.jpeg'
+        and 'South Street' and 'Haryana Karnal'))
